@@ -1,6 +1,5 @@
 import Adyen
 import json
-import uuid
 import requests
 from main.config import get_basic_lem_auth, get_lem_user, get_lem_pass, get_bp_user, get_bp_pass
 from flask import Flask, render_template, url_for, redirect, session
@@ -162,8 +161,8 @@ def account_holder(LEMid, legalName, currency):
   }
 
   payload = {
-   
-    "description": f'{legalName} Company Account Holder',
+    "description": LEMid,
+    "reference": f"{legalName} Company Account Holder",
     "legalEntityId": LEMid
   }
 

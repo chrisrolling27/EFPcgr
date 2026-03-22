@@ -710,6 +710,19 @@ overflow: visible !important;
   max-width: 42rem;
 }
 
+/* Profile / Business account: bordered key-value table */
+.profile-details-table .table {
+  border-color: #dce0e5;
+}
+.profile-details-table .table > :not(caption) > * > * {
+  padding: 0.65rem 1rem;
+  vertical-align: middle;
+  border-color: #dce0e5;
+}
+.profile-details-table .table th {
+  font-size: 0.875rem;
+}
+
 #code-sidebar {
   min-width: 300px;
   max-width: 300px;

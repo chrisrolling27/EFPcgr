@@ -83,22 +83,28 @@
                             <p class="small">This sample portal illustrates what a submerchant on your platform might see when you integrate Adyen's Balance Platform and Legal Entity Management: one home experience to register, continue hosted onboarding and KYC, review profile and store setup, browse activity, and issue or manage cards—similar to flows you would embed in your own merchant-facing product.</p>
           
                             <h5 class="card-title">Profile Details</h5>
-          
-                            <div class="row">
-                              <div class="col-lg-3 col-md-4 label">Email</div>
-                              <div class="col-lg-9 col-md-8">{{ session['email'] }}</div>
-                            </div>
-                            <div class="row">
-                              <div class="col-lg-3 col-md-4 label">Legal entity</div>
-                              <div class="col-lg-9 col-md-8">{{ organization_name or session.get('legalName') or '—' }}</div>
-                            </div>
-                            <div class="row">
-                              <div class="col-lg-3 col-md-4 label">Country</div>
-                              <div class="col-lg-9 col-md-8">{{ registration_country|default('—', true) }}</div>
-                            </div>
-                            <div class="row">
-                              <div class="col-lg-3 col-md-4 label">Currency</div>
-                              <div class="col-lg-9 col-md-8">{{ registration_currency|default('—', true) }}</div>
+  
+                            <div class="table-responsive profile-details-table mb-4">
+                              <table class="table table-bordered mb-0">
+                                <tbody>
+                                  <tr>
+                                    <th scope="row" class="bg-light text-secondary fw-semibold border-end" style="width: 36%;">Email</th>
+                                    <td>{{ session['email'] }}</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row" class="bg-light text-secondary fw-semibold border-end">Legal entity</th>
+                                    <td>{{ organization_name or session.get('legalName') or '—' }}</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row" class="bg-light text-secondary fw-semibold border-end">Country</th>
+                                    <td>{{ registration_country|default('—', true) }}</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row" class="bg-light text-secondary fw-semibold border-end">Currency</th>
+                                    <td>{{ registration_currency|default('—', true) }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
                             </div>
                             {% if newUser %}
                             <div class="alert alert-danger d-flex align-items-center border border-2 border-danger shadow py-3 mb-3" role="alert">
