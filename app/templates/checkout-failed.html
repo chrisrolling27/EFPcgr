@@ -6,7 +6,7 @@
     <div class="status-container">
         <div class="status">
             <img src="{{ url_for('static', filename='img/failed.svg') }}" class="status-image"/>
-            <p class="status-message">Your order has failed. Please try again.</p>
+            <p class="status-message">{{ message|default('Your order has failed. Please try again.', true) }}</p>
             <a class="button" href="/">Try Again</a>
         </div>
     </div>

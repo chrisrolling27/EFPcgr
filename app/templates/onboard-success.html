@@ -80,7 +80,7 @@
           
                           <div class="tab-pane fade show active profile-overview" id="profile-overview">
                             <h5 class="card-title">About</h5>
-                            <p class="small fst-italic">Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde.</p>
+                            <p class="small">This sample portal illustrates what a submerchant on your platform might see when you integrate Adyen's Balance Platform and Legal Entity Management: one home experience to register, continue hosted onboarding and KYC, review profile and store setup, browse activity, and issue or manage cards—similar to flows you would embed in your own merchant-facing product.</p>
           
                             <h5 class="card-title">Profile Details</h5>
           
@@ -88,9 +88,22 @@
                               <div class="col-lg-3 col-md-4 label">Email</div>
                               <div class="col-lg-9 col-md-8">{{ session['email'] }}</div>
                             </div>
+                            <div class="row">
+                              <div class="col-lg-3 col-md-4 label">Legal entity</div>
+                              <div class="col-lg-9 col-md-8">{{ organization_name or session.get('legalName') or '—' }}</div>
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-3 col-md-4 label">Country</div>
+                              <div class="col-lg-9 col-md-8">{{ registration_country|default('—', true) }}</div>
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-3 col-md-4 label">Currency</div>
+                              <div class="col-lg-9 col-md-8">{{ registration_currency|default('—', true) }}</div>
+                            </div>
                             {% if newUser %}
-                            <div class="alert alert-warning" role="alert">
-                                <strong>Your account is missing information.</strong>
+                            <div class="alert alert-danger d-flex align-items-center border border-2 border-danger shadow py-3 mb-3" role="alert">
+                                <svg class="bi flex-shrink-0 me-3" width="28" height="28" role="img" aria-label="Action required:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                                <strong class="fs-5 mb-0">Your account is missing KYC information.</strong>
                             </div>
                             {% endif %}
                             <form action="/onboard/{{lem}}" method="POST">
@@ -245,9 +258,9 @@
                                 <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Accepted Countries and Currencies                                </h5>
                                 <div class="col-md-6">
                                   <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="GBP" value="GBP" id="GBP">
-                                    <label class="form-check-label" for="GBP">
-                                      GBP
+                                    <input class="form-check-input" type="checkbox" name="USD" value="USD" id="USD">
+                                    <label class="form-check-label" for="USD">
+                                      USD
                                     </label>
                                   </div>
                                   <div class="form-check">
@@ -257,13 +270,19 @@
                                     </label>
                                   </div>
                                   <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="USD" value="USD" id="USD">
-                                    <label class="form-check-label" for="USD">
-                                      USD
+                                    <input class="form-check-input" type="checkbox" name="GBP" value="GBP" id="GBP">
+                                    <label class="form-check-label" for="GBP">
+                                      GBP
                                     </label>
                                   </div>
                                 </div>
                                 <div class="col-md-6">
+                                  <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="US" value="US" id="US">
+                                    <label class="form-check-label" for="US">
+                                      US
+                                    </label>
+                                  </div>
                                   <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="GB" value="GB" id="GB">
                                     <label class="form-check-label" for="GB">
@@ -274,12 +293,6 @@
                                     <input class="form-check-input" type="checkbox" name="NL" value="NL" id="NL">
                                     <label class="form-check-label" for="NL">
                                       NL
-                                    </label>
-                                  </div>
-                                  <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="US" value="US" id="US">
-                                    <label class="form-check-label" for="US">
-                                      US
                                     </label>
                                   </div>
                                 </div>
@@ -318,7 +331,7 @@
                               <div class="row mb-3">
                                 <label for="about" class="col-md-4 col-lg-3 col-form-label">About</label>
                                 <div class="col-md-8 col-lg-9">
-                                  <textarea name="about" class="form-control" id="about" style="height: 100px">Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde.</textarea>
+                                  <textarea name="about" class="form-control" id="about" style="height: 100px">This sample portal illustrates what a submerchant on your platform might see when you integrate Adyen's Balance Platform and Legal Entity Management: one home experience to register, continue hosted onboarding and KYC, review profile and store setup, browse activity, and issue or manage cards—similar to flows you would embed in your own merchant-facing product.</textarea>
                                 </div>
                               </div>
           

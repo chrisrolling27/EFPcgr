@@ -705,6 +705,11 @@ overflow: visible !important;
   width: 100%;
 }
 
+/* In-app flash banners: sit in main column (see layout grid), max width for readability */
+.app-flash-banner {
+  max-width: 42rem;
+}
+
 #code-sidebar {
   min-width: 300px;
   max-width: 300px;

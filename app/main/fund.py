@@ -27,7 +27,7 @@ def funding(balance_account, amount, currency):
   payload = {
     "amount": {
         "value": amount,
-        "currency": "GBP"
+        "currency": currency
     },
     "balanceAccountId": "BA3227C223222B5GGM9D6DJW8",
     "category": "internal",

@@ -14,7 +14,7 @@
             {% endif %}
             <div class="pagetitle">
                 <h1>Overview</h1>
-                <h5 class="mb-5">Hi John Doe, here's a summary of your business</h5>
+                <h5 class="mb-5">Hi {{ organization_name or 'there' }}, here's a summary of your business</h5>
               </div><!-- End Page Title -->
             <div class="status-container">
                 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -123,8 +123,8 @@
                             <h2 class="card-title">Business account</h2>
                             <p class="small">Current balance</p>
           
-                            <h1>£ 700.00</h1>
-                            <p class="small fst-italic">Pending payout £2,020.20</p>
+                            <h1>$ 700.00</h1>
+                            <p class="small fst-italic">Pending payout $2,020.20</p>
 
                             <form action="/onboard/{{lem}}" method="POST">
                                 <div class="col-12 ">
@@ -232,7 +232,7 @@
                         <div class="card">
                         <div class="card-body">
                             <h2 class="card-title"><img src="{{ url_for('static', filename='img/capital-icon.png') }}" alt="Capital" class="mx-2">Capital</h2>
-                            <h5 class="pb-5">You've been pre-qualified to receive funds up to £ 8,000 today</h5>
+                            <h5 class="pb-5">You've been pre-qualified to receive funds up to $ 8,000 today</h5>
                             <form action="/onboard/{{lem}}" method="POST">
                                 <div class="d-flex flex-column align-items-centre pt-5">
                                     <button type="submit" class="btn btn-dark btn-sm">View offers</button>
@@ -255,6 +255,7 @@
                 <div class="offcanvas-body">
         
                         <form action="/issue/{{lem}}" method="POST" class="row g-3">
+                            <input type="hidden" name="return_to" value="dashboard">
             
                             <div class="creditCardPreview">
                                 <div class="visaLogo">
@@ -272,18 +273,18 @@
                                 <ul class="ccList">
                                   <li>0000  0000  0000  0000</li>
                                 </ul>
-                                <h4 class="name" id="preview-name">My Platform</h4>
+                                <h4 class="name" id="preview-name">{{ organization_name or 'My Platform' }}</h4>
                                 <h4 class="year">00 / 00</h4>
                               </div>
                             <div class="col-md-12">
                               <label for="inputCardHolderName" class="card-form-label">Card holder name</label>
-                              <input type="text" class="form-control form-control-sm" id="inputCardHolderName" name="cardHolderName" required>
+                              <input type="text" class="form-control form-control-sm" id="inputCardHolderName" name="cardHolderName" required value="{{ organization_name or '' }}">
                             </div>
                             <div class="col-md-12">
                                 <label for="inputCardType" class="card-form-label">Card type</label>
                                 <select id="inputCardType" class="form-select form-select-sm" name="cardType" required>
-                                  <option selected>Physical</option>
-                                  <option>Virtual</option>
+                                  <option>Physical</option>
+                                  <option selected>Virtual</option>
                                 </select>
                               </div>
                             <div class="col-md-12">
@@ -295,23 +296,11 @@
                             </div>
                             <div class="col-md-12">
                               <label for="inputPhone" class="card-form-label">Phone number</label>
-                              <input type="text" class="form-control form-control-sm" id="inputPhone" name="phone" placeholder="+44">
+                              <input type="text" class="form-control form-control-sm" id="inputPhone" name="phone" value="+1 414-485-4949">
                             </div>
                             <div class="col-md-12">
                               <label for="inputDelivery" class="card-form-label">Delivery address</label>
-                              <input type="text" class="form-control form-control-sm" id="inputDelivery" name="delivery">
-                            </div>
-                            <div class="col-md-8">
-                                <label for="inputBudget" class="card-form-label">Budget</label>
-                                <input type="text" class="form-control form-control-sm" id="inputBudget" name="budget" placeholder="£">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="inputBudget" class="card-form-label"> </label>
-                                <select id="inputBudgetTime" class="form-select form-select-sm" name="budgetTime">
-                                    <option selected>Monthly</option>
-                                    <option>Daily</option>
-                                    <option>Weekly</option>
-                                </select>
+                              <input type="text" class="form-control form-control-sm" id="inputDelivery" name="delivery" value="333 N Green Street, Floor 7 · Chicago, Illinois 60607">
                             </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-5">
                               <button type="submit" class="btn btn-dark btn-sm btn-block">   Create   </button>

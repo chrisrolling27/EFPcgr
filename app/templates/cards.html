@@ -18,7 +18,7 @@
             {% endif %}
             <div class="pagetitle">
                 <h1>Issuing</h1>
-                <h5 class="mb-5">Hi John Doe, here's a summary of your cards' usage</h5>
+                <h5 class="mb-5">Hi {{ organization_name or 'there' }}, here's a summary of your cards' usage</h5>
               </div><!-- End Page Title -->
             <div class="status-container">
                 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -235,36 +235,36 @@
                                         <th scope="row"><span class="captured">● </span>Captured</th>
                                         <td>Jan 29, 2024, 12:39:19</td>
                                         <td>3JRMG961RP6O7294</td>
-                                        <td>-GBP 2.00</td>
-                                        <td>-GBP 2.00</td>
+                                        <td>-USD 2.00</td>
+                                        <td>-USD 2.00</td>
                                     </tr>
                                     <tr>
                                         <th scope="row"><span class="expired">● </span>Expired</th>
                                         <td>Jan 25, 2024, 14:31:13</td>
                                         <td>3JTRM161Q5514MY9</td>
-                                        <td>-GBP 2.00</td>
+                                        <td>-USD 2.00</td>
                                         <td>-</td>
                                     </tr>
                                     <tr>
                                         <th scope="row"><span class="captured">● </span>Captured</th>
                                         <td>Jan 25, 2024, 02:29:35</td>
                                         <td>48TZ0P61PXZ8ZK3A</td>
-                                        <td>-GBP 25.00</td>
-                                        <td>-GBP 25.00</td>
+                                        <td>-USD 25.00</td>
+                                        <td>-USD 25.00</td>
                                     </tr>
                                     <tr>
                                         <th scope="row"><span class="rejected">● </span>Refused</th>
                                         <td>Jan 23, 2024, 23:51:04</td>
                                         <td>3JTRM161PI47XTKU</td>
-                                        <td>-GBP 10.00</td>
+                                        <td>-USD 10.00</td>
                                         <td>-</td>
                                     </tr>
                                     <tr>
                                         <th scope="row"><span class="captured">● </span>Captured</th>
                                         <td>Jan 23, 2024, 16:11:27</td>
                                         <td>48RTUX61PDK14ZS8</td>
-                                        <td>-GBP 60.00</td>
-                                        <td>-GBP 60.00</td>
+                                        <td>-USD 60.00</td>
+                                        <td>-USD 60.00</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -284,6 +284,7 @@
               <div class="offcanvas-body">
       
                       <form action="/issue/{{lem}}" method="POST" class="row g-3">
+                          <input type="hidden" name="return_to" value="cards">
           
                           <div class="creditCardPreview">
                               <div class="visaLogo">
@@ -301,18 +302,18 @@
                               <ul class="ccList">
                                 <li>0000  0000  0000  0000</li>
                               </ul>
-                              <h4 class="name" id="preview-name">My Platform</h4>
+                              <h4 class="name" id="preview-name">{{ organization_name or 'My Platform' }}</h4>
                               <h4 class="year">00 / 00</h4>
                             </div>
                           <div class="col-md-12">
                             <label for="inputCardHolderName" class="card-form-label">Card holder name</label>
-                            <input type="text" class="form-control form-control-sm" id="inputCardHolderName" name="cardHolderName" required>
+                            <input type="text" class="form-control form-control-sm" id="inputCardHolderName" name="cardHolderName" required value="{{ organization_name or '' }}">
                           </div>
                           <div class="col-md-12">
                               <label for="inputCardType" class="card-form-label">Card type</label>
                               <select id="inputCardType" class="form-select form-select-sm" name="cardType" required>
-                                <option selected>Physical</option>
-                                <option>Virtual</option>
+                                <option>Physical</option>
+                                <option selected>Virtual</option>
                               </select>
                             </div>
                           <div class="col-md-12">
@@ -324,23 +325,11 @@
                           </div>
                           <div class="col-md-12">
                             <label for="inputPhone" class="card-form-label">Phone number</label>
-                            <input type="text" class="form-control form-control-sm" id="inputPhone" name="phone" placeholder="+44">
+                            <input type="text" class="form-control form-control-sm" id="inputPhone" name="phone" value="+1 414-485-4949">
                           </div>
                           <div class="col-md-12">
                             <label for="inputDelivery" class="card-form-label">Delivery address</label>
-                            <input type="text" class="form-control form-control-sm" id="inputDelivery" name="delivery">
-                          </div>
-                          <div class="col-md-8">
-                              <label for="inputBudget" class="card-form-label">Budget</label>
-                              <input type="text" class="form-control form-control-sm" id="inputBudget" name="budget" placeholder="£">
-                          </div>
-                          <div class="col-md-4">
-                              <label for="inputBudget" class="card-form-label"> </label>
-                              <select id="inputBudgetTime" class="form-select form-select-sm" name="budgetTime">
-                                  <option selected>Monthly</option>
-                                  <option>Daily</option>
-                                  <option>Weekly</option>
-                              </select>
+                            <input type="text" class="form-control form-control-sm" id="inputDelivery" name="delivery" value="333 N Green Street, Floor 7 · Chicago, Illinois 60607">
                           </div>
                           <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-5">
                             <button type="submit" class="btn btn-dark btn-sm btn-block">   Create   </button>

@@ -20,14 +20,14 @@ const countryVariables = [
         locale: "en_NL"
     },
     {
-        countryCode: "GB",
-        currency: "GBP",
-        locale: "en_GB"
-    },
-    {
         countryCode: "US",
         currency: "USD",
         locale: "en_US"
+    },
+    {
+        countryCode: "GB",
+        currency: "GBP",
+        locale: "en_GB"
     }
 ]
 
@@ -92,8 +92,8 @@ async function createAdyenCheckout(session) {
 
     const configuration = {
         clientKey,
-        locale: countrySettings.locale || "en_GB",
-        countryCode: countrySettings.countryCode || "GB",
+        locale: countrySettings.locale || "en_US",
+        countryCode: countrySettings.countryCode || "US",
         environment: "test",  // change to live for production
         showPayButton: true,
         session: session,
@@ -111,7 +111,7 @@ async function createAdyenCheckout(session) {
                 //onSubmit: () => {},
                 amount: {
                     value: 4000,
-                    currency: countrySettings.currency || "GBP"
+                    currency: countrySettings.currency || "USD"
                 }
             },
             threeDS2: { // Web Components 4.0.0 and above: sample configuration for the threeDS2 action type
@@ -125,7 +125,7 @@ async function createAdyenCheckout(session) {
           },
             paypal: {
                 amount: {
-                    currency: countrySettings.currency || "GBP",
+                    currency: countrySettings.currency || "USD",
                     value: 4000
                 },
                 environment: "test",

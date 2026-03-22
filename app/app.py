@@ -3,12 +3,13 @@ import sqlite3
 from os.path import exists
 
 from Adyen.util import is_valid_hmac_notification
-from flask import Flask, render_template, send_from_directory, request, session
+from flask import Flask, flash, render_template, send_from_directory, request, session
 from flask_session import Session
 
 
 import json
 import re
+from urllib.parse import parse_qs, urlparse
 
 from main import database
 from main import config
@@ -20,6 +21,47 @@ from main.business import *
 from main.card import *
 from main.reveal import *
 from main.fund import *
+
+
+def _lem_id_from_redirect_location(location):
+    """Parse LEMid from Flask redirect Location (relative or absolute). Slicing location[22:] breaks on full URLs."""
+    if not location:
+        return None
+    parsed = urlparse(location)
+    ids = parse_qs(parsed.query).get('LEMid')
+    if not ids:
+        return None
+    return ids[0]
+
+
+def _organization_name(lem):
+    """Match Profile page: prefer session legal name from registration, else DB info table."""
+    name = session.get('legalName')
+    if name:
+        return name
+    le_info = database.get_le(lem)
+    return le_info[0] if isinstance(le_info, tuple) else None
+
+
+def _registration_country_currency(lem):
+    """Country and default currency from registration (info table)."""
+    le_info = database.get_le(lem)
+    if isinstance(le_info, tuple):
+        return le_info[1], le_info[2]
+    return None, None
+
+
+_CARD_ISSUE_KYC_MSG = (
+    "You are missing capabilities that are unlocked by KYC. "
+    "Finish hosted onboarding and identity verification, then try again."
+)
+
+
+def _redirect_after_card_issue_failure(lem, return_to):
+    if return_to == 'cards':
+        return redirect(url_for('cards_view', LEMid=lem))
+    return redirect(url_for('dashboard', LEMid=lem))
+
 
 legalName =""
 
@@ -76,16 +118,10 @@ def create_app():
             session['email'] = email
             session['legalName'] = legalName
 
-            # if creation was successful, extract LEM ID
-            if "/result/success?LEMid=" in location:
-
-                # substring LEM ID (ugly but works)
-                lem_id = location[22:]
-
-                # insert login data into database
+            lem_id = _lem_id_from_redirect_location(location)
+            parsed = urlparse(location or '')
+            if lem_id and parsed.path.rstrip('/').endswith('result/success'):
                 database.insert_user(email, password, lem_id)
-
-                # insert legal entity data into database
                 database.insert_le(lem_id, legalName, country, currency)
 
             return redirect_response
@@ -107,6 +143,9 @@ def create_app():
             print(loginData)
             LEMid = loginData
             session['email'] = email
+            le_info = database.get_le(LEMid)
+            if isinstance(le_info, tuple):
+                session['legalName'] = le_info[0]
             return redirect(url_for('dashboard', LEMid=LEMid))
 
     @app.route('/getStores', methods=['POST', 'GET'])
@@ -137,7 +176,16 @@ def create_app():
         result = database.get_stores(lem)
         print("this is the result ", result)
         res = [sub['storeName'] for sub in result ]
-        return render_template('onboard-success.html', lem=lem, newUser=True, result=res)
+        reg_country, reg_currency = _registration_country_currency(lem)
+        return render_template(
+            'onboard-success.html',
+            lem=lem,
+            newUser=True,
+            result=res,
+            organization_name=_organization_name(lem),
+            registration_country=reg_country,
+            registration_currency=reg_currency,
+        )
 
     @app.route('/profile', methods=['GET', 'POST'])
     def profile():
@@ -145,7 +193,16 @@ def create_app():
         result = database.get_stores(lem)
         print("this is the result ", result)
         res = [sub['storeName'] for sub in result ]
-        return render_template('onboard-success.html', lem=lem, newUser=False, result=res)
+        reg_country, reg_currency = _registration_country_currency(lem)
+        return render_template(
+            'onboard-success.html',
+            lem=lem,
+            newUser=False,
+            result=res,
+            organization_name=_organization_name(lem),
+            registration_country=reg_country,
+            registration_currency=reg_currency,
+        )
 
     @app.route('/dashboard', methods=['GET', 'POST'])
     def dashboard():
@@ -168,7 +225,14 @@ def create_app():
             brand = data_json.get("card").get("brand")
             card_data = [last_four, month, year, cardholder, brand]
         print(card_data)
-        return render_template('dashboard.html', lem=lem, newUser=False, result=res, card_data=card_data)
+        return render_template(
+            'dashboard.html',
+            lem=lem,
+            newUser=False,
+            result=res,
+            card_data=card_data,
+            organization_name=_organization_name(lem),
+        )
 
     @app.route('/onboard/<lem>', methods=['POST', 'GET'])
     def onboard_link(lem):
@@ -291,8 +355,18 @@ def create_app():
     @app.route('/issue/<lem>', methods=['POST'])
     def new_card(lem):
         if request.method == 'POST':
+            return_to = request.form.get('return_to') or 'dashboard'
+            if return_to not in ('dashboard', 'cards'):
+                return_to = 'dashboard'
+
             # get variables from database
             result = database.get_le(lem)
+            if not isinstance(result, tuple):
+                flash(
+                    'We could not load your company profile. Sign in again or re-register.',
+                    'danger',
+                )
+                return _redirect_after_card_issue_failure(lem, return_to)
             print(result[0])
             print(result[1])
             country = "US"
@@ -307,17 +381,27 @@ def create_app():
             factor = 'virtual'
             phone = request.form['phone']
             print(scheme)
-            
-            if scheme == 'visa': 
+
+            if scheme == 'visa':
                 brand = 'visa'
                 variant = 'visa_credit_g'
-                # create payment instrument with all data
-                redirect_response = create_card(balance_account, brand, variant, card_holder, country, factor, lem, phone)
-                print(redirect_response)
-
+                if balance_account == 'not found error':
+                    flash(
+                        'No balance account was found. Complete registration before issuing a card.',
+                        'danger',
+                    )
+                    return _redirect_after_card_issue_failure(lem, return_to)
+                card_result = create_card(
+                    balance_account, brand, variant, card_holder, country, factor, lem, phone
+                )
+                print(card_result)
+                if isinstance(card_result, str):
+                    flash(_CARD_ISSUE_KYC_MSG, 'danger')
+                    return _redirect_after_card_issue_failure(lem, return_to)
                 return redirect(url_for('dashboard', LEMid=lem))
             else:
-                return render_template('checkout-failed.html')
+                flash(_CARD_ISSUE_KYC_MSG, 'danger')
+                return _redirect_after_card_issue_failure(lem, return_to)
 
     @app.route('/cards', methods=['POST', 'GET'])
     def cards_view():
@@ -340,7 +424,12 @@ def create_app():
                 each_card = [last_four, month, year, cardholder, brand]
                 card_array.append(each_card)
                 card_data = card_array
-        return render_template('cards.html', lem=lem, card_data=card_data)
+        return render_template(
+            'cards.html',
+            lem=lem,
+            card_data=card_data,
+            organization_name=_organization_name(lem),
+        )
 
     @app.route('/lastFour', methods=['POST', 'GET'])
     def last_four():

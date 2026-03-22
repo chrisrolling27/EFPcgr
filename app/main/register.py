@@ -11,6 +11,95 @@ from main import database
 MoR onboarding Flow
 '''
 
+def issuing_business_line(LEMid):
+  """LEM v4 business line for issuing (required for Balance Platform card flows)."""
+  url = "https://kyc-test.adyen.com/lem/v4/businessLines"
+
+  user = get_lem_user()
+  password = get_lem_pass()
+  basic = (user, password)
+
+  headers = {
+      'Content-Type': 'application/json'
+  }
+
+  payload = {
+      "legalEntityId": LEMid,
+      "service": "issuing",
+      "industryCode": "45391",
+      "sourceOfFunds": {
+          "adyenProcessedFunds": False,
+          "type": "assetSale",
+          "dateOfSourceEvent": "2024-12-03",
+          "description": "Sale of my property at 123 45th St, Chicago, 60613.",
+          "amount": {
+              "currency": "USD",
+              "value": 600000
+          }
+      },
+      "webData": [
+          {
+              "webAddress": "https://adyen.com/"
+          }
+      ]
+  }
+
+  print("/businessLines (v4 issuing) request:\n" + str(payload))
+  session['blReq'] = json.dumps(payload, indent=2)
+
+  response = requests.post(url, data=json.dumps(payload), headers=headers, auth=basic)
+
+  print("/businessLines (v4 issuing) response:\n" + response.text, response.status_code, response.reason)
+  print(response.headers)
+
+  if response.status_code == 200:
+    node = json.loads(response.text)
+    session['blRes'] = json.dumps(node, indent=2)
+    return None
+  return response.text
+
+
+def payment_processing_business_line(LEMid):
+  """LEM v4 business line for payment processing (eCommerce)."""
+  url = "https://kyc-test.adyen.com/lem/v4/businessLines"
+
+  user = get_lem_user()
+  password = get_lem_pass()
+  basic = (user, password)
+
+  headers = {
+      'Content-Type': 'application/json'
+  }
+
+  payload = {
+      "service": "paymentProcessing",
+      "industryCode": "4431A",
+      "salesChannels": [
+          "eCommerce"
+      ],
+      "legalEntityId": LEMid,
+      "webData": [
+          {
+              "webAddress": "https://theonion.com/"
+          }
+      ]
+  }
+
+  print("/businessLines (v4 paymentProcessing) request:\n" + str(payload))
+  session['blPaymentReq'] = json.dumps(payload, indent=2)
+
+  response = requests.post(url, data=json.dumps(payload), headers=headers, auth=basic)
+
+  print("/businessLines (v4 paymentProcessing) response:\n" + response.text, response.status_code, response.reason)
+  print(response.headers)
+
+  if response.status_code == 200:
+    node = json.loads(response.text)
+    session['blPaymentRes'] = json.dumps(node, indent=2)
+    return None
+  return response.text
+
+
 def legal_entity(legalName, currency, country):
   url = "https://kyc-test.adyen.com/lem/v2/legalEntities"
 
@@ -48,6 +137,12 @@ def legal_entity(legalName, currency, country):
   print(response.headers)
   if response.status_code == 200:
     session['leRes'] = json.dumps(node, indent=2)
+    bl_error = issuing_business_line(LEMid)
+    if bl_error is not None:
+      return bl_error
+    bl_error_pp = payment_processing_business_line(LEMid)
+    if bl_error_pp is not None:
+      return bl_error_pp
     account_holder(LEMid, legalName, currency)
     return redirect(url_for('onboard_success', LEMid=LEMid))
   else:
