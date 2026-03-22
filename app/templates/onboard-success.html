@@ -112,9 +112,9 @@
                                 <strong class="fs-5 mb-0">Your account is missing KYC information.</strong>
                             </div>
                             {% endif %}
-                            <form action="/onboard/{{lem}}" method="POST">
+                            <form action="/onboard/{{lem}}" method="POST" target="_blank" rel="noopener noreferrer">
                                 <div class="col-12">
-                                    <button type="submit" formtarget=”_blank” class="btn btn-dark btn-lg btn-block">Continue Onboarding</button>
+                                    <button type="submit" class="btn btn-dark btn-lg w-100">Continue Onboarding</button>
                                 </div>
                             </form>
           
@@ -511,6 +511,11 @@
     </script> -->
     <script>
       feather.replace()
+      document.querySelectorAll('form[action^="/onboard/"] button[type="submit"]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setTimeout(function () { btn.blur(); }, 0);
+        });
+      });
       const urlParams = new URLSearchParams(window.location.search);
       const url_lem = urlParams.get('LEMid');
       console.log(url_lem)
